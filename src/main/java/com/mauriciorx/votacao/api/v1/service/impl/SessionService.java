@@ -1,15 +1,19 @@
 package com.mauriciorx.votacao.api.v1.service.impl;
 
 import com.mauriciorx.votacao.api.v1.dto.request.SessionRequestDTO;
+import com.mauriciorx.votacao.api.v1.dto.request.VoteRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.AgendaResponseDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.SessionResponseDTO;
+import com.mauriciorx.votacao.api.v1.dto.response.VoteResponseDTO;
 import com.mauriciorx.votacao.api.v1.entity.Agenda;
 import com.mauriciorx.votacao.api.v1.entity.Session;
 import com.mauriciorx.votacao.api.v1.repository.SessionRepository;
 import com.mauriciorx.votacao.api.v1.service.ISessionService;
+import com.mauriciorx.votacao.exception.SessionClosedException;
 import com.mauriciorx.votacao.exception.SessionInProgressException;
 import com.mauriciorx.votacao.exception.SessionNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -24,9 +28,23 @@ public class SessionService implements ISessionService {
     @Autowired
     private AgendaService agendaService;
 
+    @Autowired
+    @Lazy
+    private VoteService voteService;
+
     @Override
-    public SessionResponseDTO create(Long agendaId, SessionRequestDTO requestDTO) {
-        AgendaResponseDTO agenda = agendaService.findById(agendaId);
+    public VoteResponseDTO vote(VoteRequestDTO requestDTO) {
+        Session session = sessionRepository.findById(requestDTO.getSessionId())
+                                            .orElseThrow(() -> new SessionNotFoundException(requestDTO.getSessionId()));
+
+        if(!isSessionOpened(session)) throw new SessionClosedException();
+
+        return voteService.create(requestDTO);
+    }
+
+    @Override
+    public SessionResponseDTO create(SessionRequestDTO requestDTO) {
+        AgendaResponseDTO agenda = agendaService.findById(requestDTO.getAgendaId());
 
         boolean anyOpenSession = sessionRepository.findByAgendaId( agenda.getId() ).stream().anyMatch( session -> isSessionOpened(session) );
 
@@ -59,7 +77,7 @@ public class SessionService implements ISessionService {
         return SessionResponseDTO.builder()
                                 .id(session.getId())
                                 .time(session.getTime())
-                                .agenda_id(session.getAgenda().getId())
+                                .agendaId(session.getAgenda().getId())
                                 .creationDate(session.getCreationDate())
                                 .build();
     }

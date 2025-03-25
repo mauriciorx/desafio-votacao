@@ -5,17 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class SessionRequestDTO {
+@AllArgsConstructor
+public class VoteRequestDTO {
 
-    private Integer time;
+    private Long sessionId;
+    private Long associateId;
 
-    private Long agendaId;
-
-    private LocalDateTime creationDate;
+    private boolean voteApproved;
 }

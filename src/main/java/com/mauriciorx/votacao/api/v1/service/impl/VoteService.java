@@ -8,11 +8,15 @@ import com.mauriciorx.votacao.api.v1.entity.Associate;
 import com.mauriciorx.votacao.api.v1.entity.Session;
 import com.mauriciorx.votacao.api.v1.entity.Vote;
 import com.mauriciorx.votacao.api.v1.enums.VoteEnum;
+import com.mauriciorx.votacao.api.v1.repository.AssociateRepository;
+import com.mauriciorx.votacao.api.v1.repository.SessionRepository;
 import com.mauriciorx.votacao.api.v1.repository.VoteRepository;
 import com.mauriciorx.votacao.api.v1.service.IAssociateService;
 import com.mauriciorx.votacao.api.v1.service.ISessionService;
 import com.mauriciorx.votacao.api.v1.service.IVoteService;
 import com.mauriciorx.votacao.exception.AlreadyVotedException;
+import com.mauriciorx.votacao.exception.AssociateNotFoundException;
+import com.mauriciorx.votacao.exception.SessionNotFoundException;
 import com.mauriciorx.votacao.exception.VoteNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,23 +29,22 @@ public class VoteService implements IVoteService {
 
     private final VoteRepository voteRepository;
 
-    private final ISessionService sessionService;
+    private final SessionRepository sessionRepository;
 
-    private final IAssociateService associateService;
+    private final AssociateRepository associateRepository;
 
     @Override
     public VoteResponseDTO create(VoteRequestDTO requestDTO) {
-        SessionResponseDTO session = sessionService.findById(requestDTO.getSessionId());
-        AssociateResponseDTO associate = associateService.findById(requestDTO.getAssociateId());
+        Session session = sessionRepository.findById(requestDTO.getSessionId())
+                                            .orElseThrow(() -> new SessionNotFoundException(requestDTO.getSessionId()));
+
+        Associate associate = associateRepository.findById(requestDTO.getAssociateId())
+                                                .orElseThrow(() -> new AssociateNotFoundException(requestDTO.getAssociateId()));
 
         if(voteRepository.findBySessionIdAndAssociateId(requestDTO.getSessionId(), requestDTO.getAssociateId()).isPresent()) throw new AlreadyVotedException();
 
-        Vote vote = voteRepository.save(Vote.builder().session( Session.builder()
-                                                                        .id(session.getId())
-                                                                        .build() )
-                                                        .associate(Associate.builder()
-                                                                            .id(associate.getId())
-                                                                            .build())
+        Vote vote = voteRepository.save(Vote.builder().session(session)
+                                                        .associate(associate)
                                                         .vote(requestDTO.isVoteApproved() ? VoteEnum.YES :
                                                                                             VoteEnum.NO).build());
 

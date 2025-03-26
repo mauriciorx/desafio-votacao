@@ -6,7 +6,6 @@ import com.mauriciorx.votacao.client.enums.CpfValidatorEnum;
 import com.mauriciorx.votacao.client.exception.InvalidCpfException;
 import com.mauriciorx.votacao.util.CpfUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -31,10 +30,6 @@ public class CpfValidatorService {
                                                                                                 new CpfValidatorDTO(CpfValidatorEnum.UNABLE_TO_VOTE);
 
         Map<String, String> responseBody = Map.of("status", result.getCpfValidatorEnum().name());
-
-        if( result.getCpfValidatorEnum() == CpfValidatorEnum.UNABLE_TO_VOTE ) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
-        }
 
         return ResponseEntity.ok().body(responseBody);
     }

@@ -16,7 +16,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CpfValidatorService {
 
-    private IAssociateService associateService;
+    private final IAssociateService associateService;
 
     public ResponseEntity<Map<String, String>> generateCpf() {
         Map<String, String> response = Map.of("cpf", CpfUtil.generateCpf());

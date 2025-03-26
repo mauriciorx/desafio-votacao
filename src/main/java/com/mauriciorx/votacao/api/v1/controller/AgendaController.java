@@ -3,7 +3,6 @@ package com.mauriciorx.votacao.api.v1.controller;
 import com.mauriciorx.votacao.api.v1.dto.request.AgendaRequestDTO;
 import com.mauriciorx.votacao.api.v1.service.IAgendaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AgendaController {
 
-    private IAgendaService agendaService;
+    private final IAgendaService agendaService;
 
     @PostMapping("/create")
     public ResponseEntity create(@RequestBody AgendaRequestDTO agendaRequestDTO){

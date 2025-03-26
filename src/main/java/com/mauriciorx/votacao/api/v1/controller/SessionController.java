@@ -4,7 +4,6 @@ import com.mauriciorx.votacao.api.v1.dto.request.SessionRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.request.VoteRequestDTO;
 import com.mauriciorx.votacao.api.v1.service.ISessionService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class SessionController {
 
-    private ISessionService sessionService;
+    private final ISessionService sessionService;
 
     @PostMapping("/vote")
     public ResponseEntity vote(@RequestBody VoteRequestDTO voteRequestDTO){

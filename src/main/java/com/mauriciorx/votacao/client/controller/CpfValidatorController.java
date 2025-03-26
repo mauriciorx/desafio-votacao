@@ -1,11 +1,7 @@
 package com.mauriciorx.votacao.client.controller;
 
-import com.mauriciorx.votacao.client.dto.CpfValidatorDTO;
-import com.mauriciorx.votacao.client.enums.CpfValidatorEnum;
 import com.mauriciorx.votacao.client.service.CpfValidatorService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +15,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CpfValidatorController {
 
-    private CpfValidatorService cpfValidatorService;
+    private final CpfValidatorService cpfValidatorService;
 
     @PostMapping("/generate")
     public ResponseEntity<Map<String, String>> generateCpf(){

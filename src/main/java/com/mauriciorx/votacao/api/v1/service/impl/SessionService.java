@@ -25,12 +25,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SessionService implements ISessionService {
 
-    private SessionRepository sessionRepository;
+    private final SessionRepository sessionRepository;
 
-    private IAgendaService agendaService;
+    private final IAgendaService agendaService;
 
     @Lazy
-    private IVoteService voteService;
+    private final IVoteService voteService;
 
     @Override
     public VoteResponseDTO vote(VoteRequestDTO requestDTO) {

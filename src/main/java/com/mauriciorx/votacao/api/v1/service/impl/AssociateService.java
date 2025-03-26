@@ -1,16 +1,15 @@
 package com.mauriciorx.votacao.api.v1.service.impl;
 
-import com.mauriciorx.votacao.api.v1.entity.Associate;
 import com.mauriciorx.votacao.api.v1.dto.request.AssociateRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.AssociateResponseDTO;
+import com.mauriciorx.votacao.api.v1.entity.Associate;
 import com.mauriciorx.votacao.api.v1.repository.AssociateRepository;
 import com.mauriciorx.votacao.api.v1.service.IAssociateService;
 import com.mauriciorx.votacao.client.exception.InvalidCpfException;
-import com.mauriciorx.votacao.exception.ExistentCpfException;
 import com.mauriciorx.votacao.exception.AssociateNotFoundException;
+import com.mauriciorx.votacao.exception.ExistentCpfException;
 import com.mauriciorx.votacao.util.CpfUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AssociateService implements IAssociateService {
 
-    private AssociateRepository repository;
+    private final AssociateRepository repository;
 
     @Override
     public AssociateResponseDTO create(AssociateRequestDTO requestDTO) {

@@ -23,11 +23,11 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VoteService implements IVoteService {
 
-    private VoteRepository voteRepository;
+    private final VoteRepository voteRepository;
 
-    private ISessionService sessionService;
+    private final ISessionService sessionService;
 
-    private IAssociateService associateService;
+    private final IAssociateService associateService;
 
     @Override
     public VoteResponseDTO create(VoteRequestDTO requestDTO) {

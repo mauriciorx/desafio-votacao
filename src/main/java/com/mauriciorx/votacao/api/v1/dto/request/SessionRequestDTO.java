@@ -1,5 +1,6 @@
 package com.mauriciorx.votacao.api.v1.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,5 +18,6 @@ public class SessionRequestDTO {
 
     private Long agendaId;
 
+    @Schema(hidden = true)
     private LocalDateTime creationDate;
 }

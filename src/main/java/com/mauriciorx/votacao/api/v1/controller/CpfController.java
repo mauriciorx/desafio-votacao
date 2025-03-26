@@ -1,5 +1,6 @@
 package com.mauriciorx.votacao.api.v1.controller;
 
+import com.mauriciorx.votacao.api.v1.swagger.CpfSwagger;
 import com.mauriciorx.votacao.feign.CpfUtilFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/cpf")
 @RequiredArgsConstructor
-public class CpfController {
+public class CpfController implements CpfSwagger {
 
     private final CpfUtilFacade cpfUtilFacade;
 

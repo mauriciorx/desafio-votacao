@@ -2,6 +2,7 @@ package com.mauriciorx.votacao.api.v1.controller;
 
 import com.mauriciorx.votacao.api.v1.dto.request.AssociateRequestDTO;
 import com.mauriciorx.votacao.api.v1.service.IAssociateService;
+import com.mauriciorx.votacao.api.v1.swagger.AssociateSwagger;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/associate")
 @RequiredArgsConstructor
-public class AssociateController {
+public class AssociateController implements AssociateSwagger {
 
     private final IAssociateService associateService;
 

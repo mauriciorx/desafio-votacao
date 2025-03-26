@@ -24,9 +24,7 @@ public class CpfValidatorController {
     @PostMapping("/generate")
     public ResponseEntity<Map<String, String>> generateCpf(){
         try {
-            Map<String, String> response = Map.of("cpf", cpfValidatorService.generateCpf());
-
-            return ResponseEntity.ok(response);
+            return cpfValidatorService.generateCpf();
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -35,13 +33,7 @@ public class CpfValidatorController {
     @PostMapping("/validate/{cpf}")
     public ResponseEntity<Map<String, String>> validateCpf(@PathVariable String cpf){
         try {
-            CpfValidatorDTO cpfValidatorDTO = cpfValidatorService.validateCpf( cpf );
-
-            Map<String, String> responseBody = Map.of("status", cpfValidatorDTO.getCpfValidatorEnum().name());
-
-            if(cpfValidatorDTO.getCpfValidatorEnum() == CpfValidatorEnum.UNABLE_TO_VOTE) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseBody);
-
-            return ResponseEntity.ok(responseBody);
+            return cpfValidatorService.validateCpf(cpf);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

@@ -29,7 +29,6 @@ public class SessionService implements ISessionService {
 
     private final IAgendaService agendaService;
 
-    @Lazy
     private final IVoteService voteService;
 
     @Override

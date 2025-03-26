@@ -1,8 +1,6 @@
 package com.mauriciorx.votacao.api.v1.service.impl;
 
 import com.mauriciorx.votacao.api.v1.dto.request.VoteRequestDTO;
-import com.mauriciorx.votacao.api.v1.dto.response.AssociateResponseDTO;
-import com.mauriciorx.votacao.api.v1.dto.response.SessionResponseDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.VoteResponseDTO;
 import com.mauriciorx.votacao.api.v1.entity.Associate;
 import com.mauriciorx.votacao.api.v1.entity.Session;
@@ -11,8 +9,6 @@ import com.mauriciorx.votacao.api.v1.enums.VoteEnum;
 import com.mauriciorx.votacao.api.v1.repository.AssociateRepository;
 import com.mauriciorx.votacao.api.v1.repository.SessionRepository;
 import com.mauriciorx.votacao.api.v1.repository.VoteRepository;
-import com.mauriciorx.votacao.api.v1.service.IAssociateService;
-import com.mauriciorx.votacao.api.v1.service.ISessionService;
 import com.mauriciorx.votacao.api.v1.service.IVoteService;
 import com.mauriciorx.votacao.exception.AlreadyVotedException;
 import com.mauriciorx.votacao.exception.AssociateNotFoundException;

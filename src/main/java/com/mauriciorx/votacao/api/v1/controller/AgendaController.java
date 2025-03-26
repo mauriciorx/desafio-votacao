@@ -40,4 +40,13 @@ public class AgendaController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/outcome/{agendaId}")
+    public ResponseEntity generateVoteOutcome(@PathVariable Long agendaId){
+        try {
+            return ResponseEntity.ok().body(agendaService.generateVoteOutcome(agendaId));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }

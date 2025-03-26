@@ -50,7 +50,7 @@ public class AgendaService implements IAgendaService {
         Long rejectedVotes = voteRepository.countRejectedVotes(agenda.getId());
         Long overall = approvedVotes + rejectedVotes;
 
-        String outcome = approvedVotes > rejectedVotes ? "APPROVED" : "REJECTED";
+        String outcome = overall == 0 ? "SEM RESULTADO" : approvedVotes > rejectedVotes ? "APROVADO" : "REJEITADO";
 
         return VoteOutcomeResponseDTO.builder()
                 .title(agenda.getName())

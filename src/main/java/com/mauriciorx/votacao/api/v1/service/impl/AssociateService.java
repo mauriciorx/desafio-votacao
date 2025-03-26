@@ -9,6 +9,7 @@ import com.mauriciorx.votacao.client.exception.InvalidCpfException;
 import com.mauriciorx.votacao.exception.ExistentCpfException;
 import com.mauriciorx.votacao.exception.AssociateNotFoundException;
 import com.mauriciorx.votacao.util.CpfUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +17,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class AssociateService implements IAssociateService {
 
-    @Autowired
     private AssociateRepository repository;
 
     @Override

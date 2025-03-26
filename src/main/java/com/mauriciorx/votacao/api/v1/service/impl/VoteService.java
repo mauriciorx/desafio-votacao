@@ -9,25 +9,25 @@ import com.mauriciorx.votacao.api.v1.entity.Session;
 import com.mauriciorx.votacao.api.v1.entity.Vote;
 import com.mauriciorx.votacao.api.v1.enums.VoteEnum;
 import com.mauriciorx.votacao.api.v1.repository.VoteRepository;
+import com.mauriciorx.votacao.api.v1.service.IAssociateService;
+import com.mauriciorx.votacao.api.v1.service.ISessionService;
 import com.mauriciorx.votacao.api.v1.service.IVoteService;
 import com.mauriciorx.votacao.exception.AlreadyVotedException;
 import com.mauriciorx.votacao.exception.VoteNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class VoteService implements IVoteService {
 
-    @Autowired
     private VoteRepository voteRepository;
 
-    @Autowired
-    private SessionService sessionService;
+    private ISessionService sessionService;
 
-    @Autowired
-    private AssociateService associateService;
+    private IAssociateService associateService;
 
     @Override
     public VoteResponseDTO create(VoteRequestDTO requestDTO) {

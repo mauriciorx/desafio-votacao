@@ -8,11 +8,13 @@ import com.mauriciorx.votacao.api.v1.dto.response.VoteResponseDTO;
 import com.mauriciorx.votacao.api.v1.entity.Agenda;
 import com.mauriciorx.votacao.api.v1.entity.Session;
 import com.mauriciorx.votacao.api.v1.repository.SessionRepository;
+import com.mauriciorx.votacao.api.v1.service.IAgendaService;
 import com.mauriciorx.votacao.api.v1.service.ISessionService;
+import com.mauriciorx.votacao.api.v1.service.IVoteService;
 import com.mauriciorx.votacao.exception.SessionClosedException;
 import com.mauriciorx.votacao.exception.SessionInProgressException;
 import com.mauriciorx.votacao.exception.SessionNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
@@ -20,17 +22,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SessionService implements ISessionService {
 
-    @Autowired
     private SessionRepository sessionRepository;
 
-    @Autowired
-    private AgendaService agendaService;
+    private IAgendaService agendaService;
 
-    @Autowired
     @Lazy
-    private VoteService voteService;
+    private IVoteService voteService;
 
     @Override
     public VoteResponseDTO vote(VoteRequestDTO requestDTO) {

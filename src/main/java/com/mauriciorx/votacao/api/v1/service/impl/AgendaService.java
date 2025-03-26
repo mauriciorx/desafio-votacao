@@ -8,18 +8,18 @@ import com.mauriciorx.votacao.api.v1.repository.AgendaRepository;
 import com.mauriciorx.votacao.api.v1.repository.VoteRepository;
 import com.mauriciorx.votacao.api.v1.service.IAgendaService;
 import com.mauriciorx.votacao.exception.AgendaNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class AgendaService implements IAgendaService {
 
-    @Autowired
     private AgendaRepository agendaRepository;
 
-    @Autowired
     private VoteRepository voteRepository;
 
     @Override

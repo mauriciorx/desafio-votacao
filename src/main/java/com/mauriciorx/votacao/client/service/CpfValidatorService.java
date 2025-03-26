@@ -1,18 +1,18 @@
 package com.mauriciorx.votacao.client.service;
 
-import com.mauriciorx.votacao.api.v1.service.impl.AssociateService;
+import com.mauriciorx.votacao.api.v1.service.IAssociateService;
 import com.mauriciorx.votacao.client.dto.CpfValidatorDTO;
 import com.mauriciorx.votacao.client.enums.CpfValidatorEnum;
 import com.mauriciorx.votacao.client.exception.InvalidCpfException;
 import com.mauriciorx.votacao.util.CpfUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CpfValidatorService {
 
-    @Autowired
-    private AssociateService associateService;
+    private IAssociateService associateService;
 
     public String generateCpf(){
         return CpfUtil.generateCpf();

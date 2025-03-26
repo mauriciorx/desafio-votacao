@@ -1,6 +1,6 @@
 package com.mauriciorx.votacao.api.v1.controller;
 
-import com.mauriciorx.votacao.api.v1.feign.CpfUtilFacade;
+import com.mauriciorx.votacao.feign.CpfUtilFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

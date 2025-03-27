@@ -2,6 +2,7 @@ package com.mauriciorx.votacao.api.v1.service;
 
 import com.mauriciorx.votacao.api.v1.dto.request.VoteRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.VoteResponseDTO;
+import com.mauriciorx.votacao.api.v1.entity.Agenda;
 import com.mauriciorx.votacao.api.v1.entity.Associate;
 import com.mauriciorx.votacao.api.v1.entity.Session;
 import com.mauriciorx.votacao.api.v1.entity.Vote;
@@ -50,10 +51,13 @@ public class VoteServiceTest {
     @BeforeEach
     void setUp() {
         voteRequestDTO = new VoteRequestDTO(1L, 1L, true);
-        session = new Session();
-        session.setId(1L);
-        associate = new Associate();
-        associate.setId(1L);
+
+        Agenda agenda = Agenda.builder().id(1L).build();
+
+        session = Session.builder().id(1L).agenda(agenda).build();
+
+        associate = Associate.builder().id(1L).build();
+
         vote = new Vote(1L, session, associate, VoteEnum.YES);
     }
 
@@ -61,7 +65,8 @@ public class VoteServiceTest {
     void shouldCreateVoteSuccessfully() {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(session));
         when(associateRepository.findById(1L)).thenReturn(Optional.of(associate));
-        when(voteRepository.findBySessionIdAndAssociateId(1L, 1L)).thenReturn(Optional.empty());
+        when(voteRepository.findByAssociateId(1L).stream().filter( vote -> vote.getSession().getAgenda().getId() ==
+                                                                            session.getAgenda().getId() ).toList()).thenReturn(List.of());
         when(voteRepository.save(any(Vote.class))).thenReturn(vote);
 
         VoteResponseDTO response = voteService.create(voteRequestDTO);
@@ -92,7 +97,8 @@ public class VoteServiceTest {
     void shouldThrowExceptionWhenAssociateAlreadyVoted() {
         when(sessionRepository.findById(1L)).thenReturn(Optional.of(session));
         when(associateRepository.findById(1L)).thenReturn(Optional.of(associate));
-        when(voteRepository.findBySessionIdAndAssociateId(1L, 1L)).thenReturn(Optional.of(vote));
+        when(voteRepository.findByAssociateId(1L).stream().filter( vote -> vote.getSession().getAgenda().getId() ==
+                                                                            session.getAgenda().getId() ).toList()).thenReturn(List.of(vote));
 
         assertThrows(AlreadyVotedException.class, () -> voteService.create(voteRequestDTO));
     }

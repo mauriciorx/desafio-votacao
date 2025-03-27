@@ -15,7 +15,6 @@ import com.mauriciorx.votacao.exception.SessionClosedException;
 import com.mauriciorx.votacao.exception.SessionInProgressException;
 import com.mauriciorx.votacao.exception.SessionNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

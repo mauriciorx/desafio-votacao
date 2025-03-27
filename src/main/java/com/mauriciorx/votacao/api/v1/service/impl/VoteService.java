@@ -37,7 +37,10 @@ public class VoteService implements IVoteService {
         Associate associate = associateRepository.findById(requestDTO.getAssociateId())
                                                 .orElseThrow(() -> new AssociateNotFoundException(requestDTO.getAssociateId()));
 
-        if(voteRepository.findBySessionIdAndAssociateId(requestDTO.getSessionId(), requestDTO.getAssociateId()).isPresent()) throw new AlreadyVotedException();
+        List<Vote> votesByAgenda = voteRepository.findByAssociateId( requestDTO.getAssociateId() ).stream()
+                .filter( vote -> vote.getSession().getAgenda().getId() == session.getAgenda().getId() ).toList();
+
+        if(! votesByAgenda.isEmpty()) throw new AlreadyVotedException();
 
         Vote vote = voteRepository.save(Vote.builder().session(session)
                                                         .associate(associate)

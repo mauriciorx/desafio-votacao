@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -53,7 +54,7 @@ public class VoteRepositoryTest {
     }
 
     @Test
-    void shouldFindBySessionIdAndAssociateId() {
+    void shouldFindByAssociateId() {
         Agenda agenda = Agenda.builder()
                             .name("Pauta X")
                             .description("Descrição da pauta X")
@@ -70,9 +71,9 @@ public class VoteRepositoryTest {
         Vote vote = Vote.builder().session(session).associate(associate).vote(VoteEnum.YES).build();
         vote = voteRepository.save(vote);
 
-        Optional<Vote> foundVote = voteRepository.findBySessionIdAndAssociateId(session.getId(), associate.getId());
+        List<Vote> foundVotes = voteRepository.findByAssociateId(associate.getId());
 
-        assertThat(foundVote).isPresent();
-        assertThat(foundVote.get().getVote()).isEqualTo(VoteEnum.YES);
+        assertThat(foundVotes).isNotEmpty();
+        assertThat(foundVotes.get(0).getVote()).isEqualTo(VoteEnum.YES);
     }
 }

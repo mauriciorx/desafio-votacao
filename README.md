@@ -1,117 +1,64 @@
-# Votação
+# Gerenciamento de Votos por Sessão de Pauta em uma Assembleia
+## Descrição
 
-## Objetivo
+Este projeto implementa uma API para gerenciar votos em sessões de pauta definidas em uma assembleia. A aplicação permite criar e consultar associados, pautas, sessões de votação, votos e extrair os resultados. A API foi desenvolvida utilizando as tecnologias Spring Boot, JPA, Lombok, Docker, PostgreSQL, Swagger, JUnit, Mockito, WebMvcTest, Feign e Java 21.
 
-No cooperativismo, cada associado possui um voto e as decisões são tomadas em assembleias, por votação. Imagine que você deve criar uma solução para dispositivos móveis para gerenciar e participar dessas sessões de votação.
-Essa solução deve ser executada na nuvem e promover as seguintes funcionalidades através de uma API REST:
+## Tecnologias Utilizadas
 
-- Cadastrar uma nova pauta
-- Abrir uma sessão de votação em uma pauta (a sessão de votação deve ficar aberta por
-  um tempo determinado na chamada de abertura ou 1 minuto por default)
-- Receber votos dos associados em pautas (os votos são apenas 'Sim'/'Não'. Cada associado
-  é identificado por um id único e pode votar apenas uma vez por pauta)
-- Contabilizar os votos e dar o resultado da votação na pauta
+- Spring Boot: Framework principal para a construção da aplicação;
+- JPA (Java Persistence API): Para mapeamento objeto-relacional e persistência de dados;
+- Lombok: Biblioteca para redução de código boilerplate (getter, setter, construtores, etc.);
+- Docker: Para conteinerização do banco de dados PostgreSQL;
+- PostgreSQL: Banco de dados relacional utilizado para armazenar as informações;
+- Swagger: Para documentação interativa da API;
+- JUnit & Mockito: Frameworks de testes para garantir a qualidade e o correto funcionamento da aplicação;
+- WebMvcTest: Para testar os controllers da aplicação de forma isolada;
+- Feign: Para comunicação com outros serviços (CPF);
+- Java 21: A versão do Java utilizada para desenvolvimento.
 
-Para fins de exercício, a segurança das interfaces pode ser abstraída e qualquer chamada para as interfaces pode ser considerada como autorizada. A solução deve ser construída em java, usando Spring-boot, mas os frameworks e bibliotecas são de livre escolha (desde que não infrinja direitos de uso).
+## Funcionalidades
 
-É importante que as pautas e os votos sejam persistidos e que não sejam perdidos com o restart da aplicação.
+- Criação e consulta de associados;
+- Criação e consulta de pautas para votação;
+- Criação e consulta de sessões de votação com duração específica;
+- Criação e consulta de votos únicos por associado;
+- Geração e validação de CPF;
+- Extraçao de resultados da votação.
 
-O foco dessa avaliação é a comunicação entre o backend e o aplicativo mobile. Essa comunicação é feita através de mensagens no formato JSON, onde essas mensagens serão interpretadas pelo cliente para montar as telas onde o usuário vai interagir com o sistema. A aplicação cliente não faz parte da avaliação, apenas os componentes do servidor. O formato padrão dessas mensagens será detalhado no anexo 1.
+## Regras
+- Cada associado deverá estar vinculado a um CPF distinto e válido;
+- Cada associado poderá votar apenas uma vez em cada pauta;
+- Cada sessão tem um tempo de atividade, após o encerramento não são permitidos mais votos;
+- Cada pauta poderá ter apenas uma sessão ativa;
 
-## Como proceder
+## Como Executar
+### Pré-requisitos
 
-Por favor, **CLONE** o repositório e implemente sua solução, ao final, notifique a conclusão e envie o link do seu repositório clonado no GitHub, para que possamos analisar o código implementado.
+- Docker: Para rodar o banco de dados PostgreSQL em um container.
+- Java 21: Certifique-se de ter o JDK 21 para rodar a aplicação localmente.
+- Maven: Para gerenciar dependências e construir o projeto.
 
-Lembre de deixar todas as orientações necessárias para executar o seu código.
+### Passos
 
-### Tarefas bônus
+1. Clone o repositório;
+`````
+git clone https://github.com/mauriciorx/desafio-votacao.git
+cd desafio-votacao
+`````
+2. Suba o Banco de Dados com Docker;
+`````
+docker-compose up -d
+`````
+3. Execute e acesse a aplicação.
+`````
+API - http://localhost:8080
+Swagger - http://localhost:8080/swagger-ui
+`````
+## Decisões Técnicas
+- A API foi estruturada utilizando a arquitetura em camadas, que é uma das abordagens mais comuns em projetos Spring Boot. A escolha por esse padrão arquitetural visa promover uma separação de responsabilidades e facilitar a manutenção e escalabilidade do sistema;
+- A API foi projetada com versionamento para garantir a compatibilidade com versões anteriores e permitir a evolução do sistema sem quebrar integrações existentes. O versionamento da API é especificado diretamente na URL, trazendo mais clareza, controle de compatibilidade e facilidade de manutenção;
+- Para a documentação da API foi utilizado o Swagger, pois este fornece uma interface interativa para testar manualmente os endpoints da API. Ele é útil tanto para documentação quanto para testar rapidamente a funcionalidade da API em tempo de execução;
+- O Feign foi escolhido para simular a comunicação com o serviço de consulta de validade de CPF. Sua simplicidade e integração nativa com o Spring Cloud, permite que a comunicação com serviços externos seja facilmente simulada e testada, mantendo o código limpo e legível.
 
-- Tarefa Bônus 1 - Integração com sistemas externos
-  - Criar uma Facade/Client Fake que retorna aleátoriamente se um CPF recebido é válido ou não.
-  - Caso o CPF seja inválido, a API retornará o HTTP Status 404 (Not found). Você pode usar geradores de CPF para gerar CPFs válidos
-  - Caso o CPF seja válido, a API retornará se o usuário pode (ABLE_TO_VOTE) ou não pode (UNABLE_TO_VOTE) executar a operação. Essa operação retorna resultados aleatórios, portanto um mesmo CPF pode funcionar em um teste e não funcionar no outro.
 
-```
-// CPF Ok para votar
-{
-    "status": "ABLE_TO_VOTE
-}
-// CPF Nao Ok para votar - retornar 404 no client tb
-{
-    "status": "UNABLE_TO_VOTE
-}
-```
 
-Exemplos de retorno do serviço
-
-### Tarefa Bônus 2 - Performance
-
-- Imagine que sua aplicação possa ser usada em cenários que existam centenas de
-  milhares de votos. Ela deve se comportar de maneira performática nesses
-  cenários
-- Testes de performance são uma boa maneira de garantir e observar como sua
-  aplicação se comporta
-
-### Tarefa Bônus 3 - Versionamento da API
-
-○ Como você versionaria a API da sua aplicação? Que estratégia usar?
-
-## O que será analisado
-
-- Simplicidade no design da solução (evitar over engineering)
-- Organização do código
-- Arquitetura do projeto
-- Boas práticas de programação (manutenibilidade, legibilidade etc)
-- Possíveis bugs
-- Tratamento de erros e exceções
-- Explicação breve do porquê das escolhas tomadas durante o desenvolvimento da solução
-- Uso de testes automatizados e ferramentas de qualidade
-- Limpeza do código
-- Documentação do código e da API
-- Logs da aplicação
-- Mensagens e organização dos commits
-
-## Dicas
-
-- Teste bem sua solução, evite bugs
-- Deixe o domínio das URLs de callback passiveis de alteração via configuração, para facilitar
-  o teste tanto no emulador, quanto em dispositivos fisicos.
-  Observações importantes
-- Não inicie o teste sem sanar todas as dúvidas
-- Iremos executar a aplicação para testá-la, cuide com qualquer dependência externa e
-  deixe claro caso haja instruções especiais para execução do mesmo
-  Classificação da informação: Uso Interno
-
-## Anexo 1
-
-### Introdução
-
-A seguir serão detalhados os tipos de tela que o cliente mobile suporta, assim como os tipos de campos disponíveis para a interação do usuário.
-
-### Tipo de tela – FORMULARIO
-
-A tela do tipo FORMULARIO exibe uma coleção de campos (itens) e possui um ou dois botões de ação na parte inferior.
-
-O aplicativo envia uma requisição POST para a url informada e com o body definido pelo objeto dentro de cada botão quando o mesmo é acionado. Nos casos onde temos campos de entrada
-de dados na tela, os valores informados pelo usuário são adicionados ao corpo da requisição. Abaixo o exemplo da requisição que o aplicativo vai fazer quando o botão “Ação 1” for acionado:
-
-```
-POST http://seudominio.com/ACAO1
-{
-    “campo1”: “valor1”,
-    “campo2”: 123,
-    “idCampoTexto”: “Texto”,
-    “idCampoNumerico: 999
-    “idCampoData”: “01/01/2000”
-}
-```
-
-Obs: o formato da url acima é meramente ilustrativo e não define qualquer padrão de formato.
-
-### Tipo de tela – SELECAO
-
-A tela do tipo SELECAO exibe uma lista de opções para que o usuário.
-
-O aplicativo envia uma requisição POST para a url informada e com o body definido pelo objeto dentro de cada item da lista de seleção, quando o mesmo é acionado, semelhando ao funcionamento dos botões da tela FORMULARIO.
-
-# desafio-votacao

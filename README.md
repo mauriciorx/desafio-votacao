@@ -21,7 +21,7 @@ Este projeto implementa uma API para gerenciar votos em sessões de pauta defini
 - Criação e consulta de associados;
 - Criação e consulta de pautas para votação;
 - Criação e consulta de sessões de votação com duração específica;
-- Criação e consulta de votos únicos por associado;
+- Criação de votos únicos por associado;
 - Geração e validação de CPF;
 - Extraçao de resultados da votação.
 
@@ -52,7 +52,7 @@ docker-compose up -d
 3. Execute e acesse a aplicação.
 `````
 API - http://localhost:8080
-Swagger - http://localhost:8080/swagger-ui
+Swagger - http://localhost:8080/swagger-ui/index.html
 `````
 ## Decisões Técnicas
 - A API foi estruturada utilizando a arquitetura em camadas, que é uma das abordagens mais comuns em projetos Spring Boot. A escolha por esse padrão arquitetural visa promover uma separação de responsabilidades e facilitar a manutenção e escalabilidade do sistema;

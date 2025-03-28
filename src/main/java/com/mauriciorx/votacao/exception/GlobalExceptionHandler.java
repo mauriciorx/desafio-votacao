@@ -3,6 +3,7 @@ package com.mauriciorx.votacao.exception;
 import com.mauriciorx.votacao.client.exception.InvalidCpfException;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -67,6 +68,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({FeignException.class})
     public ResponseEntity<Object> handleFeignException(FeignException exception) {
+        logError(exception);
+        return ResponseEntity.badRequest().body(exception.getMessage());
+    }
+
+    @ExceptionHandler({DataIntegrityViolationException.class})
+    public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
         logError(exception);
         return ResponseEntity.badRequest().body(exception.getMessage());
     }

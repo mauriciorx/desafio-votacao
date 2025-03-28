@@ -20,48 +20,24 @@ public class AssociateController implements AssociateSwagger {
     @PostMapping("/create")
     public ResponseEntity create(@RequestBody AssociateRequestDTO associateRequestDTO){
         log.info("Recebida requisição para criar um associado: {}", associateRequestDTO);
-
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(associateService.create(associateRequestDTO));
-        } catch (Exception e) {
-            log.error("Erro ao criar associado: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(associateService.create(associateRequestDTO));
     }
 
     @GetMapping("/{associateId}")
     public ResponseEntity findById(@PathVariable Long associateId){
         log.info("Recebida requisição para buscar associado por ID: {}", associateId);
-
-        try {
-            return ResponseEntity.ok().body(associateService.findById(associateId));
-        } catch (Exception e) {
-            log.error("Erro ao buscar associado por ID: {} - {}", associateId, e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok().body(associateService.findById(associateId));
     }
 
     @GetMapping("/cpf/{associateCpf}")
     public ResponseEntity findByCpf(@PathVariable String associateCpf){
         log.info("Recebida requisição para buscar associado por CPF: {}", associateCpf);
-
-        try {
-            return ResponseEntity.ok().body(associateService.findByCpf(associateCpf));
-        } catch (Exception e) {
-            log.error("Erro ao buscar associado por CPF: {} - {}", associateCpf, e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok().body(associateService.findByCpf(associateCpf));
     }
 
     @GetMapping("/")
     public ResponseEntity findAll(){
         log.info("Recebida requisição para listar todos os associados");
-
-        try {
-            return ResponseEntity.ok().body(associateService.findAll());
-        } catch (Exception e) {
-            log.error("Erro ao listar associados: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok().body(associateService.findAll());
     }
 }

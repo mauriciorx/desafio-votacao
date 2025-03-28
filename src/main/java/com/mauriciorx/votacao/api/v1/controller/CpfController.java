@@ -21,31 +21,21 @@ public class CpfController implements CpfSwagger {
     public ResponseEntity<Map<String, String>> generateCpf(){
         log.info("Solicitação para gerar um novo CPF recebida");
 
-        try {
-            Map<String, String> generatedCpf = cpfUtilFacade.generateCpf();
+        Map<String, String> generatedCpf = cpfUtilFacade.generateCpf();
 
-            log.info("CPF gerado com sucesso: {}", generatedCpf.get("cpf"));
+        log.info("CPF gerado com sucesso: {}", generatedCpf.get("cpf"));
 
-            return ResponseEntity.ok().body(generatedCpf);
-        } catch (Exception e) {
-            log.error("Erro ao gerar CPF: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        return ResponseEntity.ok().body(generatedCpf);
     }
 
     @PostMapping("/validate/{cpf}")
     public ResponseEntity<Map<String, String>> validateCpf(@PathVariable String cpf){
         log.info("Solicitação para validar CPF: {}", cpf);
 
-        try {
-            Map<String, String> validationResponse = cpfUtilFacade.validateCpf(cpf);
+        Map<String, String> validationResponse = cpfUtilFacade.validateCpf(cpf);
 
-            log.info("Resultado da validação do CPF {}: {}", cpf, validationResponse);
+        log.info("Resultado da validação do CPF {}: {}", cpf, validationResponse);
 
-            return ResponseEntity.ok().body(validationResponse);
-        } catch (Exception e) {
-            log.error("Erro ao validar CPF {}: {}", cpf, e.getMessage(), e);
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
-        }
+        return ResponseEntity.ok().body(validationResponse);
     }
 }

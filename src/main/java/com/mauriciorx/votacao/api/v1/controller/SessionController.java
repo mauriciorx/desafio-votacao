@@ -21,48 +21,24 @@ public class SessionController implements SessionSwagger {
     @PostMapping("/vote")
     public ResponseEntity vote(@RequestBody VoteRequestDTO voteRequestDTO){
         log.info("Recebendo solicitação de voto: {}", voteRequestDTO);
-
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(sessionService.vote(voteRequestDTO));
-        } catch (Exception e) {
-            log.error("Erro ao registrar voto: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(sessionService.vote(voteRequestDTO));
     }
 
     @PostMapping("/create")
     public ResponseEntity create(@RequestBody SessionRequestDTO sessionRequestDTO){
         log.info("Recebendo solicitação para criar sessão: {}", sessionRequestDTO);
-
-        try {
-            return ResponseEntity.status(HttpStatus.CREATED).body(sessionService.create(sessionRequestDTO));
-        } catch (Exception e) {
-            log.error("Erro ao criar sessão: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(sessionService.create(sessionRequestDTO));
     }
 
     @GetMapping("/{sessionId}")
     public ResponseEntity findById(@PathVariable Long sessionId){
         log.info("Buscando sessão por ID: {}", sessionId);
-
-        try {
-            return ResponseEntity.ok().body(sessionService.findById(sessionId));
-        } catch (Exception e) {
-            log.warn("Sessão não encontrada para ID {}: {}", sessionId, e.getMessage());
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok().body(sessionService.findById(sessionId));
     }
 
     @GetMapping("/")
     public ResponseEntity findAll(){
         log.info("Buscando todas as sessões");
-
-        try {
-            return ResponseEntity.ok().body(sessionService.findAll());
-        } catch (Exception e) {
-            log.error("Erro ao buscar todas as sessões: {}", e.getMessage(), e);
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok().body(sessionService.findAll());
     }
 }

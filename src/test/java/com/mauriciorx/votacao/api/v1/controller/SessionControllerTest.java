@@ -50,7 +50,7 @@ public class SessionControllerTest {
                         .registerModule(new JavaTimeModule())
                         .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
-        LocalDateTime creationDate = LocalDateTime.of(2025, 03, 27, 23, 03, 00);
+        LocalDateTime creationDate = LocalDateTime.of(2025, 03, 27, 10, 00, 00);
 
         sessionRequestDTO = SessionRequestDTO.builder()
                                             .time(time)
@@ -102,7 +102,7 @@ public class SessionControllerTest {
     @DisplayName("shouldVoteSuccessfully")
     @SqlGroup({
             @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
-            @Sql(scripts = "/test-scripts/setup-session.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-session-current.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "/test-scripts/setup-associate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
     })

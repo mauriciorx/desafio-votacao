@@ -1,94 +1,144 @@
 package com.mauriciorx.votacao.api.v1.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mauriciorx.votacao.api.v1.dto.request.SessionRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.request.VoteRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.SessionResponseDTO;
-import com.mauriciorx.votacao.api.v1.dto.response.VoteResponseDTO;
-import com.mauriciorx.votacao.api.v1.enums.VoteEnum;
-import com.mauriciorx.votacao.api.v1.service.ISessionService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-@WebMvcTest(SessionController.class)
+@ActiveProfiles("test")
+@DisplayName("SessionControllerTest")
+@AutoConfigureMockMvc
+@SpringBootTest
 public class SessionControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
-    private ISessionService sessionService;
-
+    private SessionRequestDTO sessionRequestDTO;
     private SessionResponseDTO sessionResponseDTO;
-    private VoteResponseDTO voteResponseDTO;
 
-    private final Integer time = 60;
+    private VoteRequestDTO voteRequestDTO;
+
+    private final Integer time = 120;
 
     @BeforeEach
     void setUp() {
-        sessionResponseDTO = new SessionResponseDTO(1L, time, 1L, LocalDateTime.now());
-        voteResponseDTO = new VoteResponseDTO(1L, 1L, 1L, VoteEnum.YES.getValue());
+        objectMapper = new ObjectMapper()
+                        .registerModule(new JavaTimeModule())
+                        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        LocalDateTime creationDate = LocalDateTime.of(2025, 03, 27, 23, 03, 00);
+
+        sessionRequestDTO = SessionRequestDTO.builder()
+                                            .time(time)
+                                            .agendaId(1L)
+                                            .creationDate(creationDate)
+                                            .build();
+
+        sessionResponseDTO = SessionResponseDTO.builder()
+                                            .id(1L)
+                                            .time(time)
+                                            .agendaId(1L)
+                                            .creationDate(creationDate)
+                                            .build();
+
+        voteRequestDTO = VoteRequestDTO.builder()
+                                        .sessionId(1L)
+                                        .associateId(1L)
+                                        .voteApproved(true)
+                                        .build();
     }
 
     @Test
-    void testCreate() throws Exception {
-        when(sessionService.create(any(SessionRequestDTO.class))).thenReturn(sessionResponseDTO);
-
-        SessionRequestDTO requestDTO = new SessionRequestDTO(time, 1L, LocalDateTime.now());
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/session/create")
+    @DisplayName("shouldCreateSessionSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldCreateSessionSuccessfully() throws Exception {
+        mockMvc.perform(post("/api/v1/session/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(sessionResponseDTO.getId()));
+                        .content(objectMapper.writeValueAsString(sessionRequestDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
-    void testVote() throws Exception {
-        when(sessionService.vote(any(VoteRequestDTO.class))).thenReturn(voteResponseDTO);
+    @DisplayName("shouldNotCreateSessionSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldNotCreateSessionSuccessfully() throws Exception {
+        mockMvc.perform(post("/api/v1/session/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sessionRequestDTO)))
+                .andExpect(status().isBadRequest());
+    }
 
-        VoteRequestDTO voteRequestDTO = new VoteRequestDTO(1L, 1L, true);
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/session/vote")
+    @Test
+    @DisplayName("shouldVoteSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-session.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-associate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldVoteSuccessfully() throws Exception {
+        mockMvc.perform(post("/api/v1/session/vote")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(voteRequestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.voteResult").value(VoteEnum.YES.getValue()));
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
-    void testFindById() throws Exception {
-        when(sessionService.findById(1L)).thenReturn(sessionResponseDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/session/1"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(sessionResponseDTO.getId()));
+    @DisplayName("shouldFindSessionById")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-session.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindSessionById() throws Exception {
+        mockMvc.perform(get("/api/v1/session/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(sessionResponseDTO)));
     }
 
     @Test
-    void testFindAll() throws Exception {
-        when(sessionService.findAll()).thenReturn(Collections.singletonList(sessionResponseDTO));
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/session/"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(sessionResponseDTO.getId()));
+    @DisplayName("shouldFindAllSessions")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-session.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindAllSessions() throws Exception {
+        mockMvc.perform(get("/api/v1/session/"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(sessionResponseDTO))));
     }
 }

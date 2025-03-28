@@ -1,89 +1,134 @@
 package com.mauriciorx.votacao.api.v1.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mauriciorx.votacao.api.v1.dto.request.AgendaRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.AgendaResponseDTO;
-import com.mauriciorx.votacao.api.v1.service.IAgendaService;
+import com.mauriciorx.votacao.api.v1.dto.response.VoteOutcomeResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.Collections;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import org.springframework.web.context.WebApplicationContext;
 
-import static org.mockito.Mockito.*;
+import java.util.List;
 
-@ExtendWith(MockitoExtension.class)
-@WebMvcTest(AgendaController.class)
+@ActiveProfiles("test")
+@DisplayName("AgendaControllerTest")
+@AutoConfigureMockMvc
+@SpringBootTest
 public class AgendaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private IAgendaService agendaService;
+    @Autowired
+    private WebApplicationContext webApplicationContext;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper;
+
+    private AgendaRequestDTO agendaRequestDTO;
+    private AgendaResponseDTO agendaResponseDTO;
+    private VoteOutcomeResponseDTO voteOutcomeResponseDTO;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
+    public void setup() {
+        objectMapper = new ObjectMapper()
+                    .registerModule(new JavaTimeModule())
+                    .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        String title = "Agenda 1";
+        String description = "Description for Agenda 1";
+
+        agendaRequestDTO = AgendaRequestDTO.builder().name(title).description(description).build();
+
+        agendaResponseDTO = AgendaResponseDTO.builder().id(1L).name(title).description(description).build();
+
+        voteOutcomeResponseDTO = VoteOutcomeResponseDTO.builder()
+                                                        .title(title)
+                                                        .description(description)
+                                                        .approvedVotes(1L)
+                                                        .rejectedVotes(0L)
+                                                        .overall(1L)
+                                                        .outcome("APROVADO")
+                                                        .build();
     }
 
     @Test
-    void testCreateAgenda() throws Exception {
-        AgendaRequestDTO requestDTO = new AgendaRequestDTO("Test Agenda", "Description");
-        AgendaResponseDTO responseDTO = new AgendaResponseDTO(1L, "Test Agenda", "Description");
-
-        when(agendaService.create(any(AgendaRequestDTO.class))).thenReturn(responseDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/agenda/create")
+    @DisplayName("shouldCreateAgendaSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldCreateAgendaSuccessfully() throws Exception {
+        mockMvc.perform(post("/api/v1/agenda/create")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDTO)))
-                .andExpect(MockMvcResultMatchers.status().isCreated())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Test Agenda"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Description"));
+                        .content(objectMapper.writeValueAsString(agendaRequestDTO)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
-    void testFindById() throws Exception {
-        Long agendaId = 1L;
-        AgendaResponseDTO responseDTO = new AgendaResponseDTO(agendaId, "Test Agenda", "Description");
-
-        when(agendaService.findById(agendaId)).thenReturn(responseDTO);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/agenda/{agendaId}", agendaId))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(1))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value("Test Agenda"))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value("Description"));
+    @DisplayName("shouldNotCreateAgendaSuccessfully")
+    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    void shouldNotCreateAgendaSuccessfully() throws Exception {
+        mockMvc.perform(post("/api/v1/agenda/create").contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(AgendaRequestDTO.builder().build())))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
-    void testFindAll() throws Exception {
-        when(agendaService.findAll()).thenReturn(Collections.emptyList());
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/agenda/"))
-                .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$").isArray());
+    @DisplayName("shouldFindById")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindById() throws Exception {
+        mockMvc.perform(get("/api/v1/agenda/{agendaId}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(agendaResponseDTO)));
     }
 
     @Test
-    void testGenerateVoteOutcome() throws Exception {
-        Long agendaId = 1L;
+    @DisplayName("shouldFindAll")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindAll() throws Exception {
+        mockMvc.perform(get("/api/v1/agenda/", 1))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(agendaResponseDTO))));
+    }
 
-        when(agendaService.generateVoteOutcome(agendaId)).thenReturn(null);
-
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/agenda/outcome/{agendaId}", agendaId))
-                .andExpect(MockMvcResultMatchers.status().isOk());
+    @Test
+    @DisplayName("shouldGenerateVoteOutcomes")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-agenda.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-associate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-session.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/setup-vote.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldGenerateVoteOutcome() throws Exception {
+        mockMvc.perform(get("/api/v1/agenda/outcome/{agendaId}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(voteOutcomeResponseDTO)));
     }
 }

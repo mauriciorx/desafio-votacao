@@ -1,38 +1,38 @@
 package com.mauriciorx.votacao.api.v1.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mauriciorx.votacao.api.v1.dto.request.AssociateRequestDTO;
 import com.mauriciorx.votacao.api.v1.dto.response.AssociateResponseDTO;
-import com.mauriciorx.votacao.api.v1.service.IAssociateService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Collections;
+import java.util.List;
 
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@ExtendWith(MockitoExtension.class)
-@WebMvcTest(AssociateController.class)
+@ActiveProfiles("test")
+@SpringBootTest
+@AutoConfigureMockMvc
+@DisplayName("AssociateControllerTest")
 public class AssociateControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockitoBean
-    private IAssociateService associateService;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     private AssociateRequestDTO associateRequestDTO;
@@ -41,48 +41,64 @@ public class AssociateControllerTest {
     private final String cpf = "241.690.100-19";
 
     @BeforeEach
-    void setUp() {
-        associateRequestDTO = new AssociateRequestDTO("Maurício Ribeiro Xavier", cpf);
-        associateResponseDTO = new AssociateResponseDTO(1L, "Maurício Ribeiro Xavier", cpf);
+    public void setUp() {
+        objectMapper = new ObjectMapper()
+                        .registerModule(new JavaTimeModule())
+                        .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+
+        String name = "Associate 1";
+
+        associateRequestDTO = AssociateRequestDTO.builder().name(name).cpf(cpf).build();
+        associateResponseDTO = AssociateResponseDTO.builder().id(1L).name(name).cpf(cpf).build();
     }
 
     @Test
-    void testCreateAssociate() throws Exception {
-        when(associateService.create(any(AssociateRequestDTO.class))).thenReturn(associateResponseDTO);
-
+    @DisplayName("shouldCreateAssociateSuccessfully")
+    @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    public void shouldCreateAssociateSuccessfully() throws Exception {
         mockMvc.perform(post("/api/v1/associate/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(associateRequestDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(associateResponseDTO.getId()))
-                .andExpect(jsonPath("$.name").value(associateResponseDTO.getName()))
-                .andExpect(jsonPath("$.cpf").value(associateResponseDTO.getCpf()));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE));
     }
 
     @Test
-    void testFindById() throws Exception {
-        when(associateService.findById(1L)).thenReturn(associateResponseDTO);
-
-        mockMvc.perform(get("/api/v1/associate/1"))
+    @DisplayName("shouldFindAssociateByIdSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-associate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindAssociateByIdSuccessfully() throws Exception {
+        mockMvc.perform(get("/api/v1/associate/{id}", 1L))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(associateResponseDTO.getId()));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(associateResponseDTO)));
     }
 
     @Test
-    void testFindByCpf() throws Exception {
-        when(associateService.findByCpf(cpf)).thenReturn(associateResponseDTO);
-
-        mockMvc.perform(get("/api/v1/associate/cpf/" + cpf))
+    @DisplayName("shouldFindAssociateByCpfSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-associate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindAssociateByCpfSuccessfully() throws Exception {
+        mockMvc.perform(get("/api/v1/associate/cpf/{cpf}", cpf))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.cpf").value(associateResponseDTO.getCpf()));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(associateResponseDTO)));
     }
 
     @Test
-    void testFindAll() throws Exception {
-        when(associateService.findAll()).thenReturn(Collections.singletonList(associateResponseDTO));
-
+    @DisplayName("shouldFindAllAssociatesSuccessfully")
+    @SqlGroup({
+            @Sql(scripts = "/test-scripts/setup-associate.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "/test-scripts/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+    })
+    public void shouldFindAllAssociatesSuccessfully() throws Exception {
         mockMvc.perform(get("/api/v1/associate/"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(associateResponseDTO.getId()));
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(content().json(objectMapper.writeValueAsString(List.of(associateResponseDTO))));
     }
 }

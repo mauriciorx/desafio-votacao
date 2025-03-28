@@ -1,7 +1,7 @@
-# Gerenciamento de Votos por Sessão de Pauta em uma Assembleia
+# Gerenciamento de votos em uma Assembleia
 ## Descrição
 
-Este projeto implementa uma API para gerenciar votos em sessões de pauta definidas em uma assembleia. A aplicação permite criar e consultar associados, pautas, sessões de votação, votos e extrair os resultados. A API foi desenvolvida utilizando as tecnologias Spring Boot, JPA, Lombok, Docker, PostgreSQL, Swagger, JUnit, Mockito, WebMvcTest, Feign e Java 21.
+Este projeto implementa uma API para gerenciar votos em sessões de pauta definidas em uma assembleia. A aplicação permite criar e consultar associados, pautas, sessões de votação, votos e extrair os resultados. A API foi desenvolvida utilizando as tecnologias Spring Boot, JPA, Lombok, Docker, PostgreSQL, Swagger, JUnit, Mockito, Feign e Java 21.
 
 ## Tecnologias Utilizadas
 
@@ -12,7 +12,6 @@ Este projeto implementa uma API para gerenciar votos em sessões de pauta defini
 - PostgreSQL: Banco de dados relacional utilizado para armazenar as informações;
 - Swagger: Para documentação interativa da API;
 - JUnit & Mockito: Frameworks de testes para garantir a qualidade e o correto funcionamento da aplicação;
-- WebMvcTest: Para testar os controllers da aplicação de forma isolada;
 - Feign: Para comunicação com outros serviços (CPF);
 - Java 21: A versão do Java utilizada para desenvolvimento.
 
@@ -58,7 +57,9 @@ Swagger - http://localhost:8080/swagger-ui/index.html
 - A API foi estruturada utilizando a arquitetura em camadas, que é uma das abordagens mais comuns em projetos Spring Boot. A escolha por esse padrão arquitetural visa promover uma separação de responsabilidades e facilitar a manutenção e escalabilidade do sistema;
 - A API foi projetada com versionamento para garantir a compatibilidade com versões anteriores e permitir a evolução do sistema sem quebrar integrações existentes. O versionamento da API é especificado diretamente na URL, trazendo mais clareza, controle de compatibilidade e facilidade de manutenção;
 - Para a documentação da API foi utilizado o Swagger, pois este fornece uma interface interativa para testar manualmente os endpoints da API. Ele é útil tanto para documentação quanto para testar rapidamente a funcionalidade da API em tempo de execução;
-- O Feign foi escolhido para simular a comunicação com o serviço de consulta de validade de CPF. Sua simplicidade e integração nativa com o Spring Cloud, permite que a comunicação com serviços externos seja facilmente simulada e testada, mantendo o código limpo e legível.
+- O Feign foi escolhido para simular a comunicação com o serviço de consulta de validade de CPF. Sua simplicidade e integração nativa com o Spring Cloud, permite que a comunicação com serviços externos seja facilmente simulada e testada, mantendo o código limpo e legível;
+- O @SpringBootTest foi utilizado para testes de integração, garantindo um ambiente próximo ao real, enquanto MockMvc permite testar controladores sem subir um servidor. O Mockito possibilitou mockar dependências nos testes de serviço, tornando-os mais rápidos e isolados. Além disso, @Sql é utilizado para preparar e limpar o banco antes e após os testes, garantindo consistência;
+- Optou-se pelo SLF4J para garantir flexibilidade na escolha da implementação de logs, facilitar a manutenção e padronizar a geração de registros, melhorando a depuração e monitoramento da aplicação.
 
 
 
